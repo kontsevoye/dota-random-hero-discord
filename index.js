@@ -1,6 +1,8 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const winston = require('winston');
+const express = require('express');
+const httpApp = express();
 const Discord = require('discord.js');
 const discordClient = new Discord.Client();
 const httpClient = axios.create({
@@ -12,12 +14,20 @@ const logger = winston.createLogger({
   ]
 });
 const token = process.env.DISCORD_TOKEN;
+const httpPort = process.env.HTTP_PORT || 8080;
 
 (async () => {
-  const response = await httpClient.get('https://dota2.gamepedia.com/Hero_Grid');
-  logger.info('page loaded');
+  let responseData;
+  try {
+    const response = await httpClient.get('https://dota2.gamepedia.com/Hero_Grid');
+    responseData = response.data;
+    logger.info('dota wiki page loaded');
+  } catch (e) {
+    logger.error('error while dota wiki page fetch');
+    process.exit(1);
+  }
 
-  const $ = cheerio.load(response.data);
+  const $ = cheerio.load(responseData);
   const heroEntries = $('.heroentry');
   const heroes = heroEntries.map((i, entry) => {
     const name = $(entry).text();
@@ -35,7 +45,7 @@ const token = process.env.DISCORD_TOKEN;
   }
 
   discordClient.on('ready', () => {
-    logger.info(`Logged in as ${discordClient.user.tag}!`);
+    logger.info(`logged in as ${discordClient.user.tag}`);
   });
 
   discordClient.on('message', msg => {
@@ -51,5 +61,13 @@ const token = process.env.DISCORD_TOKEN;
     logger.error(e.message);
     process.exit(1);
   }
+
+  httpApp.get('/', (req, res) => {
+    res.send('Hello Heroku!');
+  });
+
+  httpApp.listen(httpPort, () => {
+    logger.info(`http app listening on port ${httpPort}`);
+  });
 })();
 
