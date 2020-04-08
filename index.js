@@ -14,7 +14,7 @@ const logger = winston.createLogger({
   ]
 });
 const token = process.env.DISCORD_TOKEN;
-const httpPort = process.env.HTTP_PORT || 8080;
+const httpPort = process.env.PORT || 8080;
 
 (async () => {
   let responseData;
