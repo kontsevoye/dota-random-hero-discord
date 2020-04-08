@@ -45,6 +45,11 @@ const token = process.env.DISCORD_TOKEN;
     }
   });
 
-  discordClient.login(token);
+  try {
+    await discordClient.login(token);
+  } catch (e) {
+    logger.error(e.message);
+    process.exit(1);
+  }
 })();
 
