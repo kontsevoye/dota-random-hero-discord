@@ -51,6 +51,8 @@ const httpPort = process.env.PORT || 8080;
   discordClient.on('message', msg => {
     if (msg.content === '!random') {
       const hero = heroes[Math.floor(Math.random() * heroes.length)];
+      logger.info(`randomed ${hero.name} for ${msg.author.username} ` +
+        `at ${msg.channel.guild.name}#${msg.channel.name}`);
       msg.reply(hero.name, {files: [hero.picture]});
     }
   });
